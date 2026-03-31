@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chain Command Center - Week ending Mar 29, 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{--red:#E64847;--dark:#5D0F31;--med:#951135;--light:#FAF0F0;--green:#0F6E56;--amber:#BA7517;--text:#1A1A1A;--muted:#6B7280;--border:#E5E7EB;--bg:#F8F9FA;--white:#FFFFFF;--row-alt:#FDF6F6;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:13px;background:var(--bg);color:var(--text);}
+.topbar{background:var(--dark);color:#fff;padding:14px 28px;display:flex;align-items:center;gap:16px;}
+.logo{width:36px;height:36px;border-radius:8px;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;flex-shrink:0;}
+.topbar h1{font-size:17px;font-weight:600;}
+.topbar .wk{font-size:11px;opacity:.65;margin-top:2px;}
+.topbar .right{margin-left:auto;font-size:11px;opacity:.5;}
+.nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;display:flex;overflow-x:auto;}
+.nav-btn{padding:13px 18px;font-size:12px;font-weight:500;border:none;background:transparent;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;}
+.nav-btn.active{color:var(--red);border-bottom-color:var(--red);}
+.main{padding:24px 28px;max-width:1400px;margin:0 auto;}
+.view{display:none;}.view.active{display:block;}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.kpi{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:5px;}
+.kpi-value{font-size:22px;font-weight:700;line-height:1;}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.panel{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:18px;}
+.panel-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:14px;}
+.panel-title span{font-weight:400;text-transform:none;letter-spacing:0;margin-left:6px;color:#9CA3AF;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead tr{background:var(--dark);}
+thead th{padding:9px 12px;text-align:right;font-size:10px;font-weight:600;color:#fff;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
+thead th:first-child{text-align:left;}
+tbody tr{border-bottom:1px solid var(--border);}
+tbody tr:nth-child(even){background:var(--row-alt);}
+tbody tr:hover{background:#FEF2F2;}
+tbody td{padding:8px 12px;vertical-align:middle;text-align:right;}
+tbody td:first-child{text-align:left;}
+tfoot tr{background:var(--dark);}
+tfoot td{padding:9px 12px;font-weight:700;color:#fff;text-align:right;}
+tfoot td:first-child{text-align:left;}
+.chain-name{font-weight:600;}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;}
+.badge-severe{background:#FEE2E2;color:#B91C1C;}.badge-drop{background:#FEF3C7;color:#92400E;}
+.badge-on{background:#D1FAE5;color:#065F46;}.badge-warn{background:#FEF3C7;color:#92400E;}
+.badge-behind{background:#FEE2E2;color:#B91C1C;}.badge-na{background:#F3F4F6;color:#6B7280;}
+.sc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
+.sc{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:13px 15px;position:relative;overflow:hidden;}
+.sc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;}
+.sc-name{font-size:12px;font-weight:600;}
+.sc-pace{font-size:24px;font-weight:700;line-height:1;margin-bottom:2px;}
+.sc-detail{font-size:10px;color:var(--muted);}
+.sc-row{display:flex;justify-content:space-between;margin-top:5px;font-size:10px;color:var(--muted);}
+.sc-bar{position:absolute;bottom:0;left:0;right:0;height:3px;background:#F3F4F6;}
+.sc-fill{height:100%;}
+.green{color:#0F6E56;}.red{color:#E64847;}.amber{color:#BA7517;}.muted{color:#6B7280;}
+.cov-row{margin-bottom:9px;}
+.cov-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;}
+.cov-track{height:8px;background:#F3F4F6;border-radius:4px;display:flex;overflow:hidden;}
+.cov-c{background:#5D0F31;height:100%;}.cov-o{background:#E64847;opacity:.55;height:100%;}
+.csel{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;}
+.cs-btn{padding:4px 11px;font-size:11px;border-radius:5px;border:1px solid var(--border);cursor:pointer;background:var(--white);color:var(--muted);font-family:inherit;}
+.cs-btn:hover{border-color:var(--red);color:var(--red);}.cs-btn.active{background:var(--red);color:#fff;border-color:var(--red);}
+.calc{background:var(--light);border-radius:8px;padding:11px 14px;margin-bottom:14px;font-size:11px;color:var(--muted);line-height:1.8;border-left:3px solid var(--red);}
+.calc strong{color:var(--text);}
+.act-row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.act-row:last-child{border-bottom:none;}
+.act-dot{width:7px;height:7px;border-radius:50%;margin-top:3px;flex-shrink:0;}
+.act-chain{font-weight:600;min-width:120px;font-size:12px;}
+.act-msg{color:var(--muted);flex:1;font-size:12px;}
+.act-gap{font-weight:700;font-size:12px;color:var(--red);min-width:60px;text-align:right;}
+.info-box{background:var(--light);border-left:3px solid var(--red);border-radius:6px;padding:9px 12px;font-size:11px;color:var(--muted);margin-top:12px;line-height:1.7;}
+.info-box strong{color:var(--text);}
+</style>
+</head><body>
+<div class="topbar"><div class="logo">R</div><div><h1>Chain Command Center</h1><div class="wk">Week ending Mar 29, 2026 &nbsp;·&nbsp; OTB: Mar 30–Dec 31, 2026 confirmed arrivals</div></div><div class="right">Roibos Technologies &nbsp;|&nbsp; Confidential</div></div>
+<div class="nav"><button class="nav-btn active" onclick="show('recap',this)">Weekly Recap</button><button class="nav-btn" onclick="show('runrate',this)">Run Rate</button><button class="nav-btn" onclick="show('scorecard',this)">Pace Scorecard</button><button class="nav-btn" onclick="show('agencies',this)">Agency Drops</button><button class="nav-btn" onclick="show('hotels',this)">Hotel Drops</button></div>
+<div class="main">
+<div class="view active" id="view-recap">
+  <div class="kpi-row" id="recap-kpis"></div>
+  <div class="panel">
+    <div class="panel-title">Consumed revenue, new bookings &amp; producing hotels &middot; Mar 23&ndash;29
+      <span>Consumed = stays checked in &nbsp;|&nbsp; New Bookings = bookings made Mar 23&ndash;29 &nbsp;|&nbsp; Producing Hotels vs prior 4W avg</span>
+    </div>
+    <div class="tbl-wrap">
+      <table><thead><tr>
+        <th style="text-align:left">Chain</th><th>Consumed (&#8364;)</th><th>vs Mar 16&ndash;22</th>
+        <th>Room Nights</th><th>ADR (&#8364;)</th><th>New Bookings (&#8364;)</th><th>vs Prior Wk</th>
+        <th>Producing Hotels</th><th>vs 4W Avg</th>
+      </tr></thead><tbody id="recap-body"></tbody><tfoot id="recap-foot"></tfoot></table>
+    </div>
+    <div class="info-box"><strong>&#9432; Producing Hotels</strong> = unique hotels with at least one confirmed booking made this week. A drop signals connectivity or rate-loading issues, separate from demand changes.</div>
+  </div>
+  <div class="two-col">
+    <div class="panel"><div class="panel-title">Consumed revenue vs prior week</div><div style="position:relative;height:240px"><canvas id="consumedChart"></canvas></div></div>
+    <div class="panel"><div class="panel-title">Producing hotels vs 4W avg</div><div style="position:relative;height:240px"><canvas id="hotelsChart"></canvas></div></div>
+  </div>
+</div>
+
+<div class="view" id="view-runrate">
+  <div class="kpi-row" id="rr-kpis"></div>
+  <div class="panel">
+    <div class="panel-title">Run rate &amp; budget coverage
+      <span>Dynamic target = gap at start of week &divide; weeks remaining &nbsp;|&nbsp; Gap = Budget &minus; Consumed &minus; OTB (2026 check-ins only)</span>
+    </div>
+    <div class="tbl-wrap">
+      <table><thead><tr>
+        <th style="text-align:left">Chain</th><th>Budget</th><th>Consumed YTD</th>
+        <th>OTB (Mar 30+)</th><th>Gap</th><th>Coverage</th>
+        <th>Mar 29 Target</th><th>Mar 29 New Bk</th><th>Pace</th><th>Status</th>
+      </tr></thead><tbody id="rr-body"></tbody></table>
+    </div>
+    <div class="info-box" style="margin-top:12px">
+      <strong>Gap</strong> = Budget &minus; Consumed (Jan 1&ndash;Mar 29 check-ins) &minus; OTB (Mar 30&ndash;Dec 31, 2026 confirmed arrivals) &nbsp;|&nbsp;
+      <strong>Dynamic target</strong> = gap at start of week &divide; weeks remaining to Dec 31 &mdash; falls when booking ahead of pace, rises when behind &nbsp;|&nbsp;
+      <strong>Note:</strong> Cancellation rate adjustment pending &mdash; historical rates will be applied to OTB when provided.
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Weekly booking trend &middot; select chain</div>
+    <div class="csel" id="csel"></div>
+    <div class="calc" id="calcBox"></div>
+    <div style="position:relative;height:220px"><canvas id="trendChart"></canvas></div>
+    <div class="tbl-wrap" style="margin-top:14px">
+      <table><thead><tr>
+        <th style="text-align:left">Week</th><th>New Bookings (&#8364;)</th>
+        <th>Dynamic Target (&#8364;)</th><th>Gap at Start of Week (&#8364;)</th><th>Pace</th>
+      </tr></thead><tbody id="detail-body"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<div class="view" id="view-scorecard">
+  <div class="kpi-row" id="sc-kpis"></div>
+  <div class="panel">
+    <div class="panel-title">Pace scorecard &middot; Mar 29
+      <span>Pace = new bookings made Mar 23&ndash;29 &divide; dynamic weekly target (gap &divide; weeks remaining)</span>
+    </div>
+    <div class="sc-grid" id="scorecard"></div>
+  </div>
+  <div class="two-col">
+    <div class="panel"><div class="panel-title">Action items this week</div><div id="actions"></div></div>
+    <div class="panel"><div class="panel-title">Pace vs 1.0&times; target &middot; all chains</div><div style="position:relative;height:280px"><canvas id="paceChart"></canvas></div></div>
+  </div>
+</div>
+
+<div class="view" id="view-agencies">
+  <div class="kpi-row" id="ag-kpis"></div>
+  <div class="panel">
+    <div class="panel-title">Agency drops &middot; Mar 23&ndash;29 vs prior 4-week average
+      <span>Threshold: prior 4W avg &ge; &#8364;3,000 &nbsp;|&nbsp; Flag to distribution team</span>
+    </div>
+    <div class="tbl-wrap">
+      <table><thead><tr>
+        <th style="text-align:left">Chain</th><th style="text-align:left">Agency</th>
+        <th>This Week (&#8364;)</th><th>Prior 4W Avg (&#8364;)</th><th>Change %</th><th>Severity</th>
+      </tr></thead><tbody id="ag-body"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<div class="view" id="view-hotels">
+  <div class="kpi-row" id="ht-kpis"></div>
+  <div class="panel">
+    <div class="panel-title">Hotel drops &middot; Mar 23&ndash;29 vs prior 4-week average
+      <span>Threshold: prior 4W avg &ge; &#8364;3,000</span>
+    </div>
+    <div class="tbl-wrap">
+      <table><thead><tr>
+        <th style="text-align:left">Chain</th><th style="text-align:left">Hotel</th>
+        <th>This Week (&#8364;)</th><th>Prior 4W Avg (&#8364;)</th><th>Change %</th><th>Severity</th>
+      </tr></thead><tbody id="ht-body"></tbody></table>
+    </div>
+  </div>
+</div>
+</div>
+<script>
+const RECAP=[{"chain": "Hilton", "consumed": 618659.0, "prev_consumed": 553210.0, "rns": 3965, "new_bk": 797560.0, "prev_bk": 618962.0, "con_wow": 11.8, "bk_wow": 28.9, "hotels_this_week": 1426, "hotels_p4avg": 1312.2, "hotels_chg": 114}, {"chain": "Choice", "consumed": 153458.0, "prev_consumed": 156207.0, "rns": 1954, "new_bk": 187741.0, "prev_bk": 181614.0, "con_wow": -1.8, "bk_wow": 3.4, "hotels_this_week": 466, "hotels_p4avg": 429.0, "hotels_chg": 37}, {"chain": "Best Western", "consumed": 36159.0, "prev_consumed": 36145.0, "rns": 340, "new_bk": 66188.0, "prev_bk": 58103.0, "con_wow": 0.0, "bk_wow": 13.9, "hotels_this_week": 167, "hotels_p4avg": 140.0, "hotels_chg": 27}, {"chain": "Highgate", "consumed": 28050.0, "prev_consumed": 23042.0, "rns": 133, "new_bk": 34568.0, "prev_bk": 64086.0, "con_wow": 21.7, "bk_wow": -46.1, "hotels_this_week": 34, "hotels_p4avg": 40.5, "hotels_chg": -6}, {"chain": "Infinite Accor", "consumed": 15985.0, "prev_consumed": 24209.0, "rns": 117, "new_bk": 39646.0, "prev_bk": 35128.0, "con_wow": -34.0, "bk_wow": 12.9, "hotels_this_week": 55, "hotels_p4avg": 49.2, "hotels_chg": 6}, {"chain": "Blue Diamond Resorts", "consumed": 14952.0, "prev_consumed": 31273.0, "rns": 50, "new_bk": 72038.0, "prev_bk": 67654.0, "con_wow": -52.2, "bk_wow": 6.5, "hotels_this_week": 18, "hotels_p4avg": 13.8, "hotels_chg": 4}, {"chain": "Drury Hotels", "consumed": 12473.0, "prev_consumed": 20851.0, "rns": 90, "new_bk": 23824.0, "prev_bk": 17885.0, "con_wow": -40.2, "bk_wow": 33.2, "hotels_this_week": 16, "hotels_p4avg": 16.0, "hotels_chg": 0}, {"chain": "Premier Inn", "consumed": 6185.0, "prev_consumed": 7562.0, "rns": 59, "new_bk": 11282.0, "prev_bk": 11375.0, "con_wow": -18.2, "bk_wow": -0.8, "hotels_this_week": 21, "hotels_p4avg": 23.0, "hotels_chg": -2}, {"chain": "Wynn Resorts", "consumed": 5982.0, "prev_consumed": 4189.0, "rns": 22, "new_bk": 3008.0, "prev_bk": 8142.0, "con_wow": 42.8, "bk_wow": -63.1, "hotels_this_week": 2, "hotels_p4avg": 2.0, "hotels_chg": 0}, {"chain": "Sandals", "consumed": 4243.0, "prev_consumed": 11051.0, "rns": 10, "new_bk": 50796.0, "prev_bk": 4218.0, "con_wow": -61.6, "bk_wow": 1104.2, "hotels_this_week": 8, "hotels_p4avg": 2.5, "hotels_chg": 6}, {"chain": "Top International", "consumed": 4013.0, "prev_consumed": 2880.0, "rns": 37, "new_bk": 6973.0, "prev_bk": 6377.0, "con_wow": 39.3, "bk_wow": 9.4, "hotels_this_week": 19, "hotels_p4avg": 16.0, "hotels_chg": 3}, {"chain": "WorldHotels - BW", "consumed": 3732.0, "prev_consumed": 10847.0, "rns": 23, "new_bk": 7238.0, "prev_bk": 20170.0, "con_wow": -65.6, "bk_wow": -64.1, "hotels_this_week": 6, "hotels_p4avg": 5.2, "hotels_chg": 1}, {"chain": "Resorts World", "consumed": 2880.0, "prev_consumed": 2159.0, "rns": 33, "new_bk": 4764.0, "prev_bk": 5633.0, "con_wow": 33.4, "bk_wow": -15.4, "hotels_this_week": 2, "hotels_p4avg": 2.2, "hotels_chg": 0}, {"chain": "Bonotel", "consumed": 2722.0, "prev_consumed": 3292.0, "rns": 14, "new_bk": 148.0, "prev_bk": 3781.0, "con_wow": -17.3, "bk_wow": -96.1, "hotels_this_week": 1, "hotels_p4avg": 4.0, "hotels_chg": -3}, {"chain": "Jumeirah", "consumed": 906.0, "prev_consumed": 3129.0, "rns": 6, "new_bk": 160.0, "prev_bk": 3129.0, "con_wow": -71.0, "bk_wow": -94.9, "hotels_this_week": 1, "hotels_p4avg": 2.0, "hotels_chg": -1}, {"chain": "Station Casinos", "consumed": 128.0, "prev_consumed": 0.0, "rns": 3, "new_bk": 1063.0, "prev_bk": 161.0, "con_wow": null, "bk_wow": 559.1, "hotels_this_week": 3, "hotels_p4avg": 1.0, "hotels_chg": 2}];
+const RR={"Best Western": {"budget": 4500000.0, "consumed": 381503.0, "otb": 533632.0, "total_gen": 915135.0, "final_gap": 3584865.0, "coverage": 20.3, "latest_pace": 0.725, "latest_achieved": 66188.0, "latest_target": 91276.0, "wow": 13.9, "weeks": [{"label": "Jan 04", "achieved": 13760.0, "dynamic_target": 80769.0, "gap_at_sow": 4199980.0, "pace": 0.17}, {"label": "Jan 11", "achieved": 37071.0, "dynamic_target": 82083.0, "gap_at_sow": 4186220.0, "pace": 0.452}, {"label": "Jan 18", "achieved": 46541.0, "dynamic_target": 82983.0, "gap_at_sow": 4149149.0, "pace": 0.561}, {"label": "Jan 25", "achieved": 45553.0, "dynamic_target": 83727.0, "gap_at_sow": 4102608.0, "pace": 0.544}, {"label": "Feb 01", "achieved": 63545.0, "dynamic_target": 84522.0, "gap_at_sow": 4057055.0, "pace": 0.752}, {"label": "Feb 08", "achieved": 57251.0, "dynamic_target": 84968.0, "gap_at_sow": 3993509.0, "pace": 0.674}, {"label": "Feb 15", "achieved": 29832.0, "dynamic_target": 85571.0, "gap_at_sow": 3936259.0, "pace": 0.349}, {"label": "Feb 22", "achieved": 37290.0, "dynamic_target": 86809.0, "gap_at_sow": 3906427.0, "pace": 0.43}, {"label": "Mar 01", "achieved": 44944.0, "dynamic_target": 87935.0, "gap_at_sow": 3869137.0, "pace": 0.511}, {"label": "Mar 08", "achieved": 58641.0, "dynamic_target": 88935.0, "gap_at_sow": 3824193.0, "pace": 0.659}, {"label": "Mar 15", "achieved": 56396.0, "dynamic_target": 89656.0, "gap_at_sow": 3765552.0, "pace": 0.629}, {"label": "Mar 22", "achieved": 58103.0, "dynamic_target": 90467.0, "gap_at_sow": 3709156.0, "pace": 0.642}, {"label": "Mar 29", "achieved": 66188.0, "dynamic_target": 91276.0, "gap_at_sow": 3651053.0, "pace": 0.725}]}, "Blue Diamond Resorts": {"budget": 2600000.0, "consumed": 357247.0, "otb": 646569.0, "total_gen": 1003816.0, "final_gap": 1596184.0, "coverage": 38.6, "latest_pace": 1.727, "latest_achieved": 72038.0, "latest_target": 41706.0, "wow": 6.5, "weeks": [{"label": "Jan 04", "achieved": 10396.0, "dynamic_target": 45633.0, "gap_at_sow": 2372926.0, "pace": 0.228}, {"label": "Jan 11", "achieved": 43737.0, "dynamic_target": 46324.0, "gap_at_sow": 2362531.0, "pace": 0.944}, {"label": "Jan 18", "achieved": 57812.0, "dynamic_target": 46376.0, "gap_at_sow": 2318794.0, "pace": 1.247}, {"label": "Jan 25", "achieved": 42130.0, "dynamic_target": 46142.0, "gap_at_sow": 2260982.0, "pace": 0.913}, {"label": "Feb 01", "achieved": 95474.0, "dynamic_target": 46226.0, "gap_at_sow": 2218852.0, "pace": 2.065}, {"label": "Feb 08", "achieved": 101438.0, "dynamic_target": 45178.0, "gap_at_sow": 2123378.0, "pace": 2.245}, {"label": "Feb 15", "achieved": 56521.0, "dynamic_target": 43955.0, "gap_at_sow": 2021940.0, "pace": 1.286}, {"label": "Feb 22", "achieved": 63121.0, "dynamic_target": 43676.0, "gap_at_sow": 1965419.0, "pace": 1.445}, {"label": "Mar 01", "achieved": 52417.0, "dynamic_target": 43234.0, "gap_at_sow": 1902298.0, "pace": 1.212}, {"label": "Mar 08", "achieved": 57136.0, "dynamic_target": 43020.0, "gap_at_sow": 1849881.0, "pace": 1.328}, {"label": "Mar 15", "achieved": 56870.0, "dynamic_target": 42684.0, "gap_at_sow": 1792746.0, "pace": 1.332}, {"label": "Mar 22", "achieved": 67654.0, "dynamic_target": 42338.0, "gap_at_sow": 1735875.0, "pace": 1.598}, {"label": "Mar 29", "achieved": 72038.0, "dynamic_target": 41706.0, "gap_at_sow": 1668222.0, "pace": 1.727}]}, "Bonotel": {"budget": 50000.0, "consumed": 31236.0, "otb": 15239.0, "total_gen": 46475.0, "final_gap": 3525.0, "coverage": 92.9, "latest_pace": 1.611, "latest_achieved": 148.0, "latest_target": 92.0, "wow": -96.1, "weeks": [{"label": "Jan 04", "achieved": 227.0, "dynamic_target": 631.0, "gap_at_sow": 32829.0, "pace": 0.359}, {"label": "Jan 11", "achieved": 734.0, "dynamic_target": 639.0, "gap_at_sow": 32602.0, "pace": 1.148}, {"label": "Jan 18", "achieved": 351.0, "dynamic_target": 637.0, "gap_at_sow": 31869.0, "pace": 0.551}, {"label": "Jan 25", "achieved": 1075.0, "dynamic_target": 643.0, "gap_at_sow": 31517.0, "pace": 1.672}, {"label": "Feb 01", "achieved": 2348.0, "dynamic_target": 634.0, "gap_at_sow": 30442.0, "pace": 3.702}, {"label": "Feb 08", "achieved": 821.0, "dynamic_target": 598.0, "gap_at_sow": 28094.0, "pace": 1.373}, {"label": "Feb 15", "achieved": 6863.0, "dynamic_target": 593.0, "gap_at_sow": 27274.0, "pace": 11.576}, {"label": "Feb 22", "achieved": 5052.0, "dynamic_target": 454.0, "gap_at_sow": 20410.0, "pace": 11.138}, {"label": "Mar 01", "achieved": 3341.0, "dynamic_target": 349.0, "gap_at_sow": 15358.0, "pace": 9.572}, {"label": "Mar 08", "achieved": 1004.0, "dynamic_target": 279.0, "gap_at_sow": 12017.0, "pace": 3.594}, {"label": "Mar 15", "achieved": 3558.0, "dynamic_target": 262.0, "gap_at_sow": 11013.0, "pace": 13.571}, {"label": "Mar 22", "achieved": 3781.0, "dynamic_target": 182.0, "gap_at_sow": 7454.0, "pace": 20.798}, {"label": "Mar 29", "achieved": 148.0, "dynamic_target": 92.0, "gap_at_sow": 3673.0, "pace": 1.611}]}, "Choice": {"budget": 6000000.0, "consumed": 1388532.0, "otb": 256394.0, "total_gen": 1644925.0, "final_gap": 4355075.0, "coverage": 27.4, "latest_pace": 1.653, "latest_achieved": 187741.0, "latest_target": 113570.0, "wow": 3.4, "weeks": [{"label": "Jan 04", "achieved": 37176.0, "dynamic_target": 115173.0, "gap_at_sow": 5988981.0, "pace": 0.323}, {"label": "Jan 11", "achieved": 57366.0, "dynamic_target": 116702.0, "gap_at_sow": 5951805.0, "pace": 0.492}, {"label": "Jan 18", "achieved": 64142.0, "dynamic_target": 117889.0, "gap_at_sow": 5894440.0, "pace": 0.544}, {"label": "Jan 25", "achieved": 77877.0, "dynamic_target": 118986.0, "gap_at_sow": 5830298.0, "pace": 0.655}, {"label": "Feb 01", "achieved": 133870.0, "dynamic_target": 119842.0, "gap_at_sow": 5752421.0, "pace": 1.117}, {"label": "Feb 08", "achieved": 149120.0, "dynamic_target": 119544.0, "gap_at_sow": 5618551.0, "pace": 1.247}, {"label": "Feb 15", "achieved": 170538.0, "dynamic_target": 118901.0, "gap_at_sow": 5469431.0, "pace": 1.434}, {"label": "Feb 22", "achieved": 146022.0, "dynamic_target": 117753.0, "gap_at_sow": 5298893.0, "pace": 1.24}, {"label": "Mar 01", "achieved": 145333.0, "dynamic_target": 117111.0, "gap_at_sow": 5152871.0, "pace": 1.241}, {"label": "Mar 08", "achieved": 138266.0, "dynamic_target": 116454.0, "gap_at_sow": 5007539.0, "pace": 1.187}, {"label": "Mar 15", "achieved": 144843.0, "dynamic_target": 115935.0, "gap_at_sow": 4869273.0, "pace": 1.249}, {"label": "Mar 22", "achieved": 181614.0, "dynamic_target": 115230.0, "gap_at_sow": 4724430.0, "pace": 1.576}, {"label": "Mar 29", "achieved": 187741.0, "dynamic_target": 113570.0, "gap_at_sow": 4542816.0, "pace": 1.653}]}, "Drury Hotels": {"budget": 1115000.0, "consumed": 164615.0, "otb": 74684.0, "total_gen": 239299.0, "final_gap": 875701.0, "coverage": 21.5, "latest_pace": 1.059, "latest_achieved": 23824.0, "latest_target": 22488.0, "wow": 33.2, "weeks": [{"label": "Jan 04", "achieved": 10102.0, "dynamic_target": 20828.0, "gap_at_sow": 1083077.0, "pace": 0.485}, {"label": "Jan 11", "achieved": 21110.0, "dynamic_target": 21039.0, "gap_at_sow": 1072976.0, "pace": 1.003}, {"label": "Jan 18", "achieved": 17796.0, "dynamic_target": 21037.0, "gap_at_sow": 1051865.0, "pace": 0.846}, {"label": "Jan 25", "achieved": 20144.0, "dynamic_target": 21103.0, "gap_at_sow": 1034069.0, "pace": 0.955}, {"label": "Feb 01", "achieved": 14315.0, "dynamic_target": 21123.0, "gap_at_sow": 1013925.0, "pace": 0.678}, {"label": "Feb 08", "achieved": 2211.0, "dynamic_target": 21268.0, "gap_at_sow": 999610.0, "pace": 0.104}, {"label": "Feb 15", "achieved": 1843.0, "dynamic_target": 21683.0, "gap_at_sow": 997398.0, "pace": 0.085}, {"label": "Feb 22", "achieved": 19368.0, "dynamic_target": 22123.0, "gap_at_sow": 995556.0, "pace": 0.875}, {"label": "Mar 01", "achieved": 17762.0, "dynamic_target": 22186.0, "gap_at_sow": 976188.0, "pace": 0.801}, {"label": "Mar 08", "achieved": 19745.0, "dynamic_target": 22289.0, "gap_at_sow": 958426.0, "pace": 0.886}, {"label": "Mar 15", "achieved": 21271.0, "dynamic_target": 22350.0, "gap_at_sow": 938681.0, "pace": 0.952}, {"label": "Mar 22", "achieved": 17885.0, "dynamic_target": 22376.0, "gap_at_sow": 917410.0, "pace": 0.799}, {"label": "Mar 29", "achieved": 23824.0, "dynamic_target": 22488.0, "gap_at_sow": 899525.0, "pace": 1.059}]}, "Highgate": {"budget": 1100000.0, "consumed": 292336.0, "otb": 419453.0, "total_gen": 711788.0, "final_gap": 388212.0, "coverage": 64.7, "latest_pace": 3.271, "latest_achieved": 34568.0, "latest_target": 10569.0, "wow": -46.1, "weeks": [{"label": "Jan 04", "achieved": 7289.0, "dynamic_target": 18538.0, "gap_at_sow": 963982.0, "pace": 0.393}, {"label": "Jan 11", "achieved": 18428.0, "dynamic_target": 18759.0, "gap_at_sow": 956694.0, "pace": 0.982}, {"label": "Jan 18", "achieved": 19463.0, "dynamic_target": 18765.0, "gap_at_sow": 938266.0, "pace": 1.037}, {"label": "Jan 25", "achieved": 36318.0, "dynamic_target": 18751.0, "gap_at_sow": 918803.0, "pace": 1.937}, {"label": "Feb 01", "achieved": 47349.0, "dynamic_target": 18385.0, "gap_at_sow": 882486.0, "pace": 2.575}, {"label": "Feb 08", "achieved": 62592.0, "dynamic_target": 17769.0, "gap_at_sow": 835137.0, "pace": 3.523}, {"label": "Feb 15", "achieved": 56942.0, "dynamic_target": 16794.0, "gap_at_sow": 772545.0, "pace": 3.391}, {"label": "Feb 22", "achieved": 49703.0, "dynamic_target": 15902.0, "gap_at_sow": 715602.0, "pace": 3.126}, {"label": "Mar 01", "achieved": 61818.0, "dynamic_target": 15134.0, "gap_at_sow": 665900.0, "pace": 4.085}, {"label": "Mar 08", "achieved": 64811.0, "dynamic_target": 14048.0, "gap_at_sow": 604082.0, "pace": 4.613}, {"label": "Mar 15", "achieved": 52406.0, "dynamic_target": 12840.0, "gap_at_sow": 539271.0, "pace": 4.081}, {"label": "Mar 22", "achieved": 64086.0, "dynamic_target": 11875.0, "gap_at_sow": 486866.0, "pace": 5.397}, {"label": "Mar 29", "achieved": 34568.0, "dynamic_target": 10569.0, "gap_at_sow": 422779.0, "pace": 3.271}]}, "Hilton": {"budget": 36500000.0, "consumed": 7392102.0, "otb": 3396885.0, "total_gen": 10788987.0, "final_gap": 25711013.0, "coverage": 29.6, "latest_pace": 1.203, "latest_achieved": 797560.0, "latest_target": 662714.0, "wow": 28.9, "weeks": [{"label": "Jan 04", "achieved": 273570.0, "dynamic_target": 685116.0, "gap_at_sow": 35626033.0, "pace": 0.399}, {"label": "Jan 11", "achieved": 711211.0, "dynamic_target": 693186.0, "gap_at_sow": 35352463.0, "pace": 1.026}, {"label": "Jan 18", "achieved": 694154.0, "dynamic_target": 692825.0, "gap_at_sow": 34641252.0, "pace": 1.002}, {"label": "Jan 25", "achieved": 749135.0, "dynamic_target": 692798.0, "gap_at_sow": 33947098.0, "pace": 1.081}, {"label": "Feb 01", "achieved": 822299.0, "dynamic_target": 691624.0, "gap_at_sow": 33197963.0, "pace": 1.189}, {"label": "Feb 08", "achieved": 881718.0, "dynamic_target": 688844.0, "gap_at_sow": 32375664.0, "pace": 1.28}, {"label": "Feb 15", "achieved": 890541.0, "dynamic_target": 684651.0, "gap_at_sow": 31493947.0, "pace": 1.301}, {"label": "Feb 22", "achieved": 792721.0, "dynamic_target": 680076.0, "gap_at_sow": 30603406.0, "pace": 1.166}, {"label": "Mar 01", "achieved": 945087.0, "dynamic_target": 677516.0, "gap_at_sow": 29810685.0, "pace": 1.395}, {"label": "Mar 08", "achieved": 903259.0, "dynamic_target": 671293.0, "gap_at_sow": 28865598.0, "pace": 1.346}, {"label": "Mar 15", "achieved": 834804.0, "dynamic_target": 665770.0, "gap_at_sow": 27962339.0, "pace": 1.254}, {"label": "Mar 22", "achieved": 618962.0, "dynamic_target": 661647.0, "gap_at_sow": 27127535.0, "pace": 0.935}, {"label": "Mar 29", "achieved": 797560.0, "dynamic_target": 662714.0, "gap_at_sow": 26508573.0, "pace": 1.203}]}, "Infinite Accor": {"budget": 2200000.0, "consumed": 261137.0, "otb": 222930.0, "total_gen": 484067.0, "final_gap": 1715933.0, "coverage": 22.0, "latest_pace": 0.903, "latest_achieved": 39646.0, "latest_target": 43889.0, "wow": 12.9, "weeks": [{"label": "Jan 04", "achieved": 11013.0, "dynamic_target": 39717.0, "gap_at_sow": 2065292.0, "pace": 0.277}, {"label": "Jan 11", "achieved": 34643.0, "dynamic_target": 40280.0, "gap_at_sow": 2054279.0, "pace": 0.86}, {"label": "Jan 18", "achieved": 19797.0, "dynamic_target": 40393.0, "gap_at_sow": 2019636.0, "pace": 0.49}, {"label": "Jan 25", "achieved": 36456.0, "dynamic_target": 40813.0, "gap_at_sow": 1999839.0, "pace": 0.893}, {"label": "Feb 01", "achieved": 25547.0, "dynamic_target": 40904.0, "gap_at_sow": 1963384.0, "pace": 0.625}, {"label": "Feb 08", "achieved": 25617.0, "dynamic_target": 41231.0, "gap_at_sow": 1937837.0, "pace": 0.621}, {"label": "Feb 15", "achieved": 23982.0, "dynamic_target": 41570.0, "gap_at_sow": 1912219.0, "pace": 0.577}, {"label": "Feb 22", "achieved": 25286.0, "dynamic_target": 41961.0, "gap_at_sow": 1888237.0, "pace": 0.603}, {"label": "Mar 01", "achieved": 26806.0, "dynamic_target": 42340.0, "gap_at_sow": 1862951.0, "pace": 0.633}, {"label": "Mar 08", "achieved": 22201.0, "dynamic_target": 42701.0, "gap_at_sow": 1836145.0, "pace": 0.52}, {"label": "Mar 15", "achieved": 23235.0, "dynamic_target": 43189.0, "gap_at_sow": 1813943.0, "pace": 0.538}, {"label": "Mar 22", "achieved": 35128.0, "dynamic_target": 43676.0, "gap_at_sow": 1790708.0, "pace": 0.804}, {"label": "Mar 29", "achieved": 39646.0, "dynamic_target": 43889.0, "gap_at_sow": 1755580.0, "pace": 0.903}]}, "Jumeirah": {"budget": 450000.0, "consumed": 140786.0, "otb": 14532.0, "total_gen": 155319.0, "final_gap": 294681.0, "coverage": 34.5, "latest_pace": 0.022, "latest_achieved": 160.0, "latest_target": 7371.0, "wow": -94.9, "weeks": [{"label": "Jan 04", "achieved": 747.0, "dynamic_target": 8338.0, "gap_at_sow": 433551.0, "pace": 0.09}, {"label": "Jan 11", "achieved": 5292.0, "dynamic_target": 8486.0, "gap_at_sow": 432804.0, "pace": 0.624}, {"label": "Jan 18", "achieved": 16738.0, "dynamic_target": 8550.0, "gap_at_sow": 427512.0, "pace": 1.958}, {"label": "Jan 25", "achieved": 18305.0, "dynamic_target": 8383.0, "gap_at_sow": 410774.0, "pace": 2.184}, {"label": "Feb 01", "achieved": 7353.0, "dynamic_target": 8176.0, "gap_at_sow": 392469.0, "pace": 0.899}, {"label": "Feb 08", "achieved": 19664.0, "dynamic_target": 8194.0, "gap_at_sow": 385116.0, "pace": 2.4}, {"label": "Feb 15", "achieved": 10177.0, "dynamic_target": 7945.0, "gap_at_sow": 365453.0, "pace": 1.281}, {"label": "Feb 22", "achieved": 17579.0, "dynamic_target": 7895.0, "gap_at_sow": 355276.0, "pace": 2.227}, {"label": "Mar 01", "achieved": 26112.0, "dynamic_target": 7675.0, "gap_at_sow": 337697.0, "pace": 3.402}, {"label": "Mar 08", "achieved": 6900.0, "dynamic_target": 7246.0, "gap_at_sow": 311585.0, "pace": 0.952}, {"label": "Mar 15", "achieved": 6714.0, "dynamic_target": 7254.0, "gap_at_sow": 304684.0, "pace": 0.926}, {"label": "Mar 22", "achieved": 3129.0, "dynamic_target": 7268.0, "gap_at_sow": 297970.0, "pace": 0.431}, {"label": "Mar 29", "achieved": 160.0, "dynamic_target": 7371.0, "gap_at_sow": 294841.0, "pace": 0.022}]}, "Pacifica": {"budget": 50000.0, "consumed": 0.0, "otb": 0.0, "total_gen": 0.0, "final_gap": 50000.0, "coverage": 0.0, "latest_pace": 0.0, "latest_achieved": 0.0, "latest_target": 1250.0, "wow": null, "weeks": [{"label": "Jan 04", "achieved": 0.0, "dynamic_target": 962.0, "gap_at_sow": 50000.0, "pace": 0.0}, {"label": "Jan 11", "achieved": 0.0, "dynamic_target": 980.0, "gap_at_sow": 50000.0, "pace": 0.0}, {"label": "Jan 18", "achieved": 0.0, "dynamic_target": 1000.0, "gap_at_sow": 50000.0, "pace": 0.0}, {"label": "Jan 25", "achieved": 0.0, "dynamic_target": 1020.0, "gap_at_sow": 50000.0, "pace": 0.0}, {"label": "Feb 01", "achieved": 0.0, "dynamic_target": 1042.0, "gap_at_sow": 50000.0, "pace": 0.0}, {"label": "Feb 08", "achieved": 0.0, "dynamic_target": 1064.0, "gap_at_sow": 50000.0, "pace": 0.0}, {"label": "Feb 15", "achieved": 0.0, "dynamic_target": 1087.0, "gap_at_sow": 50000.0, "pace": 0.0}, {"label": "Feb 22", "achieved": 0.0, "dynamic_target": 1111.0, "gap_at_sow": 50000.0, "pace": 0.0}, {"label": "Mar 01", "achieved": 0.0, "dynamic_target": 1136.0, "gap_at_sow": 50000.0, "pace": 0.0}, {"label": "Mar 08", "achieved": 0.0, "dynamic_target": 1163.0, "gap_at_sow": 50000.0, "pace": 0.0}, {"label": "Mar 15", "achieved": 0.0, "dynamic_target": 1190.0, "gap_at_sow": 50000.0, "pace": 0.0}, {"label": "Mar 22", "achieved": 0.0, "dynamic_target": 1220.0, "gap_at_sow": 50000.0, "pace": 0.0}, {"label": "Mar 29", "achieved": 0.0, "dynamic_target": 1250.0, "gap_at_sow": 50000.0, "pace": 0.0}]}, "Premier Inn": {"budget": 500000.0, "consumed": 50077.0, "otb": 130191.0, "total_gen": 180268.0, "final_gap": 319732.0, "coverage": 36.1, "latest_pace": 1.363, "latest_achieved": 11282.0, "latest_target": 8275.0, "wow": -0.8, "weeks": [{"label": "Jan 04", "achieved": 2255.0, "dynamic_target": 8096.0, "gap_at_sow": 420990.0, "pace": 0.279}, {"label": "Jan 11", "achieved": 4572.0, "dynamic_target": 8210.0, "gap_at_sow": 418735.0, "pace": 0.557}, {"label": "Jan 18", "achieved": 3814.0, "dynamic_target": 8283.0, "gap_at_sow": 414163.0, "pace": 0.46}, {"label": "Jan 25", "achieved": 7362.0, "dynamic_target": 8374.0, "gap_at_sow": 410349.0, "pace": 0.879}, {"label": "Feb 01", "achieved": 10236.0, "dynamic_target": 8396.0, "gap_at_sow": 402987.0, "pace": 1.219}, {"label": "Feb 08", "achieved": 3662.0, "dynamic_target": 8356.0, "gap_at_sow": 392751.0, "pace": 0.438}, {"label": "Feb 15", "achieved": 3382.0, "dynamic_target": 8458.0, "gap_at_sow": 389089.0, "pace": 0.4}, {"label": "Feb 22", "achieved": 3225.0, "dynamic_target": 8571.0, "gap_at_sow": 385707.0, "pace": 0.376}, {"label": "Mar 01", "achieved": 10224.0, "dynamic_target": 8693.0, "gap_at_sow": 382482.0, "pace": 1.176}, {"label": "Mar 08", "achieved": 11990.0, "dynamic_target": 8657.0, "gap_at_sow": 372259.0, "pace": 1.385}, {"label": "Mar 15", "achieved": 17879.0, "dynamic_target": 8578.0, "gap_at_sow": 360268.0, "pace": 2.084}, {"label": "Mar 22", "achieved": 11375.0, "dynamic_target": 8351.0, "gap_at_sow": 342390.0, "pace": 1.362}, {"label": "Mar 29", "achieved": 11282.0, "dynamic_target": 8275.0, "gap_at_sow": 331014.0, "pace": 1.363}]}, "Resorts World": {"budget": 200000.0, "consumed": 23590.0, "otb": 28306.0, "total_gen": 51896.0, "final_gap": 148104.0, "coverage": 25.9, "latest_pace": 1.247, "latest_achieved": 4764.0, "latest_target": 3822.0, "wow": -15.4, "weeks": [{"label": "Jan 04", "achieved": 1016.0, "dynamic_target": 3707.0, "gap_at_sow": 192784.0, "pace": 0.274}, {"label": "Jan 11", "achieved": 4213.0, "dynamic_target": 3760.0, "gap_at_sow": 191768.0, "pace": 1.12}, {"label": "Jan 18", "achieved": 1456.0, "dynamic_target": 3751.0, "gap_at_sow": 187555.0, "pace": 0.388}, {"label": "Jan 25", "achieved": 3144.0, "dynamic_target": 3798.0, "gap_at_sow": 186100.0, "pace": 0.828}, {"label": "Feb 01", "achieved": 1568.0, "dynamic_target": 3812.0, "gap_at_sow": 182955.0, "pace": 0.411}, {"label": "Feb 08", "achieved": 2194.0, "dynamic_target": 3859.0, "gap_at_sow": 181387.0, "pace": 0.569}, {"label": "Feb 15", "achieved": 3297.0, "dynamic_target": 3895.0, "gap_at_sow": 179193.0, "pace": 0.846}, {"label": "Feb 22", "achieved": 2717.0, "dynamic_target": 3909.0, "gap_at_sow": 175896.0, "pace": 0.695}, {"label": "Mar 01", "achieved": 4292.0, "dynamic_target": 3936.0, "gap_at_sow": 173179.0, "pace": 1.091}, {"label": "Mar 08", "achieved": 6783.0, "dynamic_target": 3928.0, "gap_at_sow": 168887.0, "pace": 1.727}, {"label": "Mar 15", "achieved": 3602.0, "dynamic_target": 3860.0, "gap_at_sow": 162103.0, "pace": 0.933}, {"label": "Mar 22", "achieved": 5633.0, "dynamic_target": 3866.0, "gap_at_sow": 158501.0, "pace": 1.457}, {"label": "Mar 29", "achieved": 4764.0, "dynamic_target": 3822.0, "gap_at_sow": 152868.0, "pace": 1.247}]}, "Rotana": {"budget": 993000.0, "consumed": 21739.0, "otb": 3800.0, "total_gen": 25540.0, "final_gap": 967460.0, "coverage": 2.6, "latest_pace": 0.0, "latest_achieved": 0.0, "latest_target": 24187.0, "wow": null, "weeks": [{"label": "Jan 04", "achieved": 479.0, "dynamic_target": 19024.0, "gap_at_sow": 989249.0, "pace": 0.025}, {"label": "Jan 11", "achieved": 2934.0, "dynamic_target": 19388.0, "gap_at_sow": 988770.0, "pace": 0.151}, {"label": "Jan 18", "achieved": 4530.0, "dynamic_target": 19717.0, "gap_at_sow": 985836.0, "pace": 0.23}, {"label": "Jan 25", "achieved": 805.0, "dynamic_target": 20027.0, "gap_at_sow": 981306.0, "pace": 0.04}, {"label": "Feb 01", "achieved": 4953.0, "dynamic_target": 20427.0, "gap_at_sow": 980501.0, "pace": 0.242}, {"label": "Feb 08", "achieved": 1956.0, "dynamic_target": 20756.0, "gap_at_sow": 975548.0, "pace": 0.094}, {"label": "Feb 15", "achieved": 1374.0, "dynamic_target": 21165.0, "gap_at_sow": 973591.0, "pace": 0.065}, {"label": "Feb 22", "achieved": 2528.0, "dynamic_target": 21605.0, "gap_at_sow": 972218.0, "pace": 0.117}, {"label": "Mar 01", "achieved": 2230.0, "dynamic_target": 22038.0, "gap_at_sow": 969690.0, "pace": 0.101}, {"label": "Mar 08", "achieved": 0.0, "dynamic_target": 22499.0, "gap_at_sow": 967460.0, "pace": 0.0}, {"label": "Mar 15", "achieved": 0.0, "dynamic_target": 23035.0, "gap_at_sow": 967460.0, "pace": 0.0}, {"label": "Mar 22", "achieved": 0.0, "dynamic_target": 23597.0, "gap_at_sow": 967460.0, "pace": 0.0}, {"label": "Mar 29", "achieved": 0.0, "dynamic_target": 24187.0, "gap_at_sow": 967460.0, "pace": 0.0}]}, "Sandals": {"budget": 472000.0, "consumed": 134421.0, "otb": 329334.0, "total_gen": 463755.0, "final_gap": 8245.0, "coverage": 98.3, "latest_pace": 34.414, "latest_achieved": 50796.0, "latest_target": 1476.0, "wow": 1104.3, "weeks": [{"label": "Jan 04", "achieved": 7460.0, "dynamic_target": 6894.0, "gap_at_sow": 358477.0, "pace": 1.082}, {"label": "Jan 11", "achieved": 0.0, "dynamic_target": 6883.0, "gap_at_sow": 351018.0, "pace": 0.0}, {"label": "Jan 18", "achieved": 4106.0, "dynamic_target": 7020.0, "gap_at_sow": 351018.0, "pace": 0.585}, {"label": "Jan 25", "achieved": 2943.0, "dynamic_target": 7080.0, "gap_at_sow": 346912.0, "pace": 0.416}, {"label": "Feb 01", "achieved": 33672.0, "dynamic_target": 7166.0, "gap_at_sow": 343969.0, "pace": 4.699}, {"label": "Feb 08", "achieved": 29717.0, "dynamic_target": 6602.0, "gap_at_sow": 310297.0, "pace": 4.501}, {"label": "Feb 15", "achieved": 97384.0, "dynamic_target": 6100.0, "gap_at_sow": 280580.0, "pace": 15.966}, {"label": "Feb 22", "achieved": 89889.0, "dynamic_target": 4071.0, "gap_at_sow": 183195.0, "pace": 22.08}, {"label": "Mar 01", "achieved": 16503.0, "dynamic_target": 2121.0, "gap_at_sow": 93307.0, "pace": 7.782}, {"label": "Mar 08", "achieved": 8303.0, "dynamic_target": 1786.0, "gap_at_sow": 76804.0, "pace": 4.649}, {"label": "Mar 15", "achieved": 5242.0, "dynamic_target": 1631.0, "gap_at_sow": 68501.0, "pace": 3.214}, {"label": "Mar 22", "achieved": 4218.0, "dynamic_target": 1543.0, "gap_at_sow": 63259.0, "pace": 2.734}, {"label": "Mar 29", "achieved": 50796.0, "dynamic_target": 1476.0, "gap_at_sow": 59040.0, "pace": 34.414}]}, "Station Casinos": {"budget": 45000.0, "consumed": 2378.0, "otb": 1326.0, "total_gen": 3704.0, "final_gap": 41296.0, "coverage": 8.2, "latest_pace": 1.004, "latest_achieved": 1063.0, "latest_target": 1059.0, "wow": 560.2, "weeks": [{"label": "Jan 04", "achieved": 571.0, "dynamic_target": 856.0, "gap_at_sow": 44509.0, "pace": 0.668}, {"label": "Jan 11", "achieved": 127.0, "dynamic_target": 862.0, "gap_at_sow": 43937.0, "pace": 0.148}, {"label": "Jan 18", "achieved": 172.0, "dynamic_target": 876.0, "gap_at_sow": 43810.0, "pace": 0.196}, {"label": "Jan 25", "achieved": 0.0, "dynamic_target": 891.0, "gap_at_sow": 43639.0, "pace": 0.0}, {"label": "Feb 01", "achieved": 235.0, "dynamic_target": 909.0, "gap_at_sow": 43639.0, "pace": 0.258}, {"label": "Feb 08", "achieved": 110.0, "dynamic_target": 923.0, "gap_at_sow": 43404.0, "pace": 0.119}, {"label": "Feb 15", "achieved": 0.0, "dynamic_target": 941.0, "gap_at_sow": 43294.0, "pace": 0.0}, {"label": "Feb 22", "achieved": 339.0, "dynamic_target": 962.0, "gap_at_sow": 43294.0, "pace": 0.353}, {"label": "Mar 01", "achieved": 0.0, "dynamic_target": 976.0, "gap_at_sow": 42954.0, "pace": 0.0}, {"label": "Mar 08", "achieved": 0.0, "dynamic_target": 999.0, "gap_at_sow": 42954.0, "pace": 0.0}, {"label": "Mar 15", "achieved": 434.0, "dynamic_target": 1023.0, "gap_at_sow": 42954.0, "pace": 0.425}, {"label": "Mar 22", "achieved": 161.0, "dynamic_target": 1037.0, "gap_at_sow": 42520.0, "pace": 0.156}, {"label": "Mar 29", "achieved": 1063.0, "dynamic_target": 1059.0, "gap_at_sow": 42359.0, "pace": 1.004}]}, "Top International": {"budget": 500000.0, "consumed": 32594.0, "otb": 36403.0, "total_gen": 68997.0, "final_gap": 431003.0, "coverage": 13.8, "latest_pace": 0.637, "latest_achieved": 6973.0, "latest_target": 10949.0, "wow": 9.3, "weeks": [{"label": "Jan 04", "achieved": 3705.0, "dynamic_target": 9495.0, "gap_at_sow": 493750.0, "pace": 0.39}, {"label": "Jan 11", "achieved": 7298.0, "dynamic_target": 9609.0, "gap_at_sow": 490045.0, "pace": 0.76}, {"label": "Jan 18", "achieved": 3816.0, "dynamic_target": 9655.0, "gap_at_sow": 482747.0, "pace": 0.395}, {"label": "Jan 25", "achieved": 4981.0, "dynamic_target": 9774.0, "gap_at_sow": 478930.0, "pace": 0.51}, {"label": "Feb 01", "achieved": 4131.0, "dynamic_target": 9874.0, "gap_at_sow": 473949.0, "pace": 0.418}, {"label": "Feb 08", "achieved": 2649.0, "dynamic_target": 9996.0, "gap_at_sow": 469819.0, "pace": 0.265}, {"label": "Feb 15", "achieved": 358.0, "dynamic_target": 10156.0, "gap_at_sow": 467170.0, "pace": 0.035}, {"label": "Feb 22", "achieved": 1978.0, "dynamic_target": 10374.0, "gap_at_sow": 466812.0, "pace": 0.191}, {"label": "Mar 01", "achieved": 3319.0, "dynamic_target": 10564.0, "gap_at_sow": 464834.0, "pace": 0.314}, {"label": "Mar 08", "achieved": 9519.0, "dynamic_target": 10733.0, "gap_at_sow": 461515.0, "pace": 0.887}, {"label": "Mar 15", "achieved": 7643.0, "dynamic_target": 10762.0, "gap_at_sow": 451996.0, "pace": 0.71}, {"label": "Mar 22", "achieved": 6377.0, "dynamic_target": 10838.0, "gap_at_sow": 444353.0, "pace": 0.588}, {"label": "Mar 29", "achieved": 6973.0, "dynamic_target": 10949.0, "gap_at_sow": 437976.0, "pace": 0.637}]}, "WorldHotels - BW": {"budget": 275000.0, "consumed": 46106.0, "otb": 37957.0, "total_gen": 84063.0, "final_gap": 190937.0, "coverage": 30.6, "latest_pace": 1.461, "latest_achieved": 7238.0, "latest_target": 4954.0, "wow": -64.1, "weeks": [{"label": "Jan 04", "achieved": 2113.0, "dynamic_target": 5291.0, "gap_at_sow": 275140.0, "pace": 0.399}, {"label": "Jan 11", "achieved": 1019.0, "dynamic_target": 5353.0, "gap_at_sow": 273027.0, "pace": 0.19}, {"label": "Jan 18", "achieved": 4591.0, "dynamic_target": 5440.0, "gap_at_sow": 272008.0, "pace": 0.844}, {"label": "Jan 25", "achieved": 6179.0, "dynamic_target": 5457.0, "gap_at_sow": 267416.0, "pace": 1.132}, {"label": "Feb 01", "achieved": 8340.0, "dynamic_target": 5442.0, "gap_at_sow": 261237.0, "pace": 1.532}, {"label": "Feb 08", "achieved": 2891.0, "dynamic_target": 5381.0, "gap_at_sow": 252897.0, "pace": 0.537}, {"label": "Feb 15", "achieved": 7556.0, "dynamic_target": 5435.0, "gap_at_sow": 250006.0, "pace": 1.39}, {"label": "Feb 22", "achieved": 8520.0, "dynamic_target": 5388.0, "gap_at_sow": 242450.0, "pace": 1.581}, {"label": "Mar 01", "achieved": 5585.0, "dynamic_target": 5317.0, "gap_at_sow": 233931.0, "pace": 1.051}, {"label": "Mar 08", "achieved": 5812.0, "dynamic_target": 5310.0, "gap_at_sow": 228345.0, "pace": 1.094}, {"label": "Mar 15", "achieved": 4189.0, "dynamic_target": 5298.0, "gap_at_sow": 222533.0, "pace": 0.791}, {"label": "Mar 22", "achieved": 20170.0, "dynamic_target": 5325.0, "gap_at_sow": 218344.0, "pace": 3.787}, {"label": "Mar 29", "achieved": 7238.0, "dynamic_target": 4954.0, "gap_at_sow": 198175.0, "pace": 1.461}]}, "Wynn Resorts": {"budget": 550000.0, "consumed": 56065.0, "otb": 51083.0, "total_gen": 107148.0, "final_gap": 442852.0, "coverage": 19.5, "latest_pace": 0.27, "latest_achieved": 3008.0, "latest_target": 11147.0, "wow": -63.1, "weeks": [{"label": "Jan 04", "achieved": 2360.0, "dynamic_target": 10436.0, "gap_at_sow": 542655.0, "pace": 0.226}, {"label": "Jan 11", "achieved": 2964.0, "dynamic_target": 10594.0, "gap_at_sow": 540295.0, "pace": 0.28}, {"label": "Jan 18", "achieved": 2207.0, "dynamic_target": 10747.0, "gap_at_sow": 537331.0, "pace": 0.205}, {"label": "Jan 25", "achieved": 1821.0, "dynamic_target": 10921.0, "gap_at_sow": 535124.0, "pace": 0.167}, {"label": "Feb 01", "achieved": 8837.0, "dynamic_target": 11110.0, "gap_at_sow": 533303.0, "pace": 0.795}, {"label": "Feb 08", "achieved": 10142.0, "dynamic_target": 11159.0, "gap_at_sow": 524466.0, "pace": 0.909}, {"label": "Feb 15", "achieved": 11036.0, "dynamic_target": 11181.0, "gap_at_sow": 514324.0, "pace": 0.987}, {"label": "Feb 22", "achieved": 10066.0, "dynamic_target": 11184.0, "gap_at_sow": 503288.0, "pace": 0.9}, {"label": "Mar 01", "achieved": 15240.0, "dynamic_target": 11210.0, "gap_at_sow": 493222.0, "pace": 1.36}, {"label": "Mar 08", "achieved": 13573.0, "dynamic_target": 11116.0, "gap_at_sow": 477983.0, "pace": 1.221}, {"label": "Mar 15", "achieved": 10407.0, "dynamic_target": 11057.0, "gap_at_sow": 464410.0, "pace": 0.941}, {"label": "Mar 22", "achieved": 8142.0, "dynamic_target": 11073.0, "gap_at_sow": 454003.0, "pace": 0.735}, {"label": "Mar 29", "achieved": 3008.0, "dynamic_target": 11147.0, "gap_at_sow": 445861.0, "pace": 0.27}]}};
+const AGS=[{"chain": "Hilton", "agency": "Innstant Travel Limited B2B", "this_wk": 18137.0, "p4avg": 28572.0, "chg": -36.5, "sev": "DROP"}, {"chain": "Choice", "agency": "Hibeds", "this_wk": 13059.0, "p4avg": 19430.0, "chg": -32.8, "sev": "DROP"}, {"chain": "Highgate", "agency": "Dida Travel B2B PLUS", "this_wk": 6888.0, "p4avg": 17501.0, "chg": -60.6, "sev": "DROP"}, {"chain": "Hilton", "agency": "Tripsnstay B2B ", "this_wk": 2099.0, "p4avg": 12519.0, "chg": -83.2, "sev": "DROP"}, {"chain": "Choice", "agency": "BEDSOPIA RETAIL", "this_wk": 7094.0, "p4avg": 12307.0, "chg": -42.4, "sev": "DROP"}, {"chain": "Hilton", "agency": "Hotelston B2B Only Web", "this_wk": 4454.0, "p4avg": 12107.0, "chg": -63.2, "sev": "DROP"}, {"chain": "Highgate", "agency": "Nuitee CUG", "this_wk": 7050.0, "p4avg": 11897.0, "chg": -40.7, "sev": "DROP"}, {"chain": "Hilton", "agency": "Ottila International UAE", "this_wk": 5292.0, "p4avg": 11867.0, "chg": -55.4, "sev": "DROP"}, {"chain": "Hilton", "agency": "Pax2night", "this_wk": 7268.0, "p4avg": 11386.0, "chg": -36.2, "sev": "DROP"}, {"chain": "Highgate", "agency": "TBO Holidays", "this_wk": 6605.0, "p4avg": 11355.0, "chg": -41.8, "sev": "DROP"}, {"chain": "Hilton", "agency": "PEAKPOINT GLOBAL B2B", "this_wk": 2916.0, "p4avg": 8544.0, "chg": -65.9, "sev": "DROP"}, {"chain": "Choice", "agency": "W2M - WORLD2MEET B2B", "this_wk": 0.0, "p4avg": 7344.0, "chg": -100.0, "sev": "SEVERE"}, {"chain": "Hilton", "agency": "Riya Holidays", "this_wk": 2705.0, "p4avg": 7128.0, "chg": -62.1, "sev": "DROP"}, {"chain": "Hilton", "agency": "REGENCY TRAVEL AND TOURS B2B ", "this_wk": 2938.0, "p4avg": 5732.0, "chg": -48.7, "sev": "DROP"}, {"chain": "Best Western", "agency": "BEDSOPIA RETAIL", "this_wk": 3217.0, "p4avg": 5144.0, "chg": -37.5, "sev": "DROP"}, {"chain": "Hilton", "agency": "Ebooking Center PLUS", "this_wk": 0.0, "p4avg": 4510.0, "chg": -100.0, "sev": "SEVERE"}, {"chain": "Highgate", "agency": "Hibeds", "this_wk": 455.0, "p4avg": 4502.0, "chg": -89.9, "sev": "DROP"}, {"chain": "Wynn Resorts", "agency": "Vio B2C", "this_wk": 975.0, "p4avg": 4095.0, "chg": -76.2, "sev": "DROP"}, {"chain": "Hilton", "agency": "GBN TRAVEL", "this_wk": 2614.0, "p4avg": 4001.0, "chg": -34.7, "sev": "DROP"}, {"chain": "Hilton", "agency": "VOYAGE TOURS", "this_wk": 0.0, "p4avg": 3834.0, "chg": -100.0, "sev": "SEVERE"}, {"chain": "Jumeirah", "agency": "Smile Holidays B2B", "this_wk": 0.0, "p4avg": 3704.0, "chg": -100.0, "sev": "SEVERE"}, {"chain": "Hilton", "agency": "EZLINK HOTELS", "this_wk": 0.0, "p4avg": 3595.0, "chg": -100.0, "sev": "SEVERE"}, {"chain": "Best Western", "agency": "Innstant Travel Limited B2B", "this_wk": 1044.0, "p4avg": 3398.0, "chg": -69.3, "sev": "DROP"}, {"chain": "Hilton", "agency": "myGo Worldwide B2B", "this_wk": 0.0, "p4avg": 3194.0, "chg": -100.0, "sev": "SEVERE"}];
+const HTS=[{"chain": "Hilton", "hotel": "The WB Abu Dhabi, Curio Collection by Hilton", "this_wk": 9444.0, "p4avg": 17765.0, "chg": -46.8, "sev": "DROP"}, {"chain": "Blue Diamond Resorts", "hotel": "Royalton CHIC Cancun", "this_wk": 7711.0, "p4avg": 17011.0, "chg": -54.7, "sev": "DROP"}, {"chain": "Hilton", "hotel": "Hilton Abu Dhabi Yas Island", "this_wk": 5174.0, "p4avg": 13676.0, "chg": -62.2, "sev": "DROP"}, {"chain": "Highgate", "hotel": "Park Lane Hotel New York", "this_wk": 0.0, "p4avg": 11211.0, "chg": -100.0, "sev": "SEVERE"}, {"chain": "Hilton", "hotel": "Hilton Edinburgh Carlton", "this_wk": 4868.0, "p4avg": 9440.0, "chg": -48.4, "sev": "DROP"}, {"chain": "Hilton", "hotel": "Hilton London Metropole", "this_wk": 3178.0, "p4avg": 9087.0, "chg": -65.0, "sev": "DROP"}, {"chain": "Wynn Resorts", "hotel": "Wynn Las Vegas", "this_wk": 120.0, "p4avg": 8891.0, "chg": -98.7, "sev": "DROP"}, {"chain": "Hilton", "hotel": "Hilton Waikiki Beach Resort & Spa", "this_wk": 2587.0, "p4avg": 8249.0, "chg": -68.6, "sev": "DROP"}, {"chain": "Jumeirah", "hotel": "Jumeirah Jabal Omar Makkah", "this_wk": 0.0, "p4avg": 7747.0, "chg": -100.0, "sev": "SEVERE"}, {"chain": "Hilton", "hotel": "Hilton Suites Jabal Omar Makkah", "this_wk": 399.0, "p4avg": 6983.0, "chg": -94.3, "sev": "DROP"}, {"chain": "Hilton", "hotel": "Hilton Hotel & Convention Jabal Omar Makkah", "this_wk": 411.0, "p4avg": 6038.0, "chg": -93.2, "sev": "DROP"}, {"chain": "Highgate", "hotel": "The Knickerbocker", "this_wk": 1277.0, "p4avg": 5885.0, "chg": -78.3, "sev": "DROP"}, {"chain": "Hilton", "hotel": "DoubleTree by Hilton Makkah Jabal Omar", "this_wk": 818.0, "p4avg": 5044.0, "chg": -83.8, "sev": "DROP"}, {"chain": "Hilton", "hotel": "DoubleTree by Hilton Hotel London - Tower of London", "this_wk": 1510.0, "p4avg": 4945.0, "chg": -69.5, "sev": "DROP"}, {"chain": "Hilton", "hotel": "Hilton Stockholm Slussen", "this_wk": 317.0, "p4avg": 4506.0, "chg": -93.0, "sev": "DROP"}, {"chain": "Hilton", "hotel": "Hilton Aruba Caribbean Resort & Casino", "this_wk": 2613.0, "p4avg": 4481.0, "chg": -41.7, "sev": "DROP"}, {"chain": "Blue Diamond Resorts", "hotel": "ROYALTON CHIC ANTIGUA", "this_wk": 1559.0, "p4avg": 4387.0, "chg": -64.5, "sev": "DROP"}, {"chain": "Hilton", "hotel": "Conrad Bali", "this_wk": 0.0, "p4avg": 4307.0, "chg": -100.0, "sev": "SEVERE"}, {"chain": "Hilton", "hotel": "Hilton Dubai Jumeirah", "this_wk": 2760.0, "p4avg": 4146.0, "chg": -33.4, "sev": "DROP"}, {"chain": "Choice", "hotel": "Econo Lodge Rivervale", "this_wk": 1347.0, "p4avg": 4082.0, "chg": -67.0, "sev": "DROP"}, {"chain": "Hilton", "hotel": "Hilton Garden Inn Singapore Serangoon", "this_wk": 983.0, "p4avg": 3847.0, "chg": -74.4, "sev": "DROP"}, {"chain": "Hilton", "hotel": "Waldorf Astoria Dubai Palm Jumeirah", "this_wk": 0.0, "p4avg": 3577.0, "chg": -100.0, "sev": "SEVERE"}, {"chain": "Hilton", "hotel": "Lost Property St Pauls London - Curio Collection by Hilton", "this_wk": 0.0, "p4avg": 3527.0, "chg": -100.0, "sev": "SEVERE"}, {"chain": "Blue Diamond Resorts", "hotel": "Planet Hollywood Cancun, An Autograph Collection All-Inclusive Resort", "this_wk": 0.0, "p4avg": 3483.0, "chg": -100.0, "sev": "SEVERE"}, {"chain": "Hilton", "hotel": "Conrad Dubai", "this_wk": 2024.0, "p4avg": 3439.0, "chg": -41.1, "sev": "DROP"}, {"chain": "Hilton", "hotel": "Hampton By Hilton Budapest City Centre", "this_wk": 1348.0, "p4avg": 3392.0, "chg": -60.3, "sev": "DROP"}, {"chain": "Hilton", "hotel": "Hampton by Hilton London Park Royal", "this_wk": 759.0, "p4avg": 3310.0, "chg": -77.1, "sev": "DROP"}, {"chain": "Choice", "hotel": "Cambria Hotel St Petersburg-Madeira Beach Marina", "this_wk": 1759.0, "p4avg": 3217.0, "chg": -45.3, "sev": "DROP"}, {"chain": "Highgate", "hotel": "Millennium Hotel Broadway Times Square", "this_wk": 1695.0, "p4avg": 3177.0, "chg": -46.6, "sev": "DROP"}, {"chain": "Hilton", "hotel": "The BoTree London, Curio Collection by Hilton", "this_wk": 573.0, "p4avg": 3115.0, "chg": -81.6, "sev": "DROP"}, {"chain": "Hilton", "hotel": "Hilton Garden Inn San Juan Condado", "this_wk": 383.0, "p4avg": 3074.0, "chg": -87.5, "sev": "DROP"}];
+
+const rendered={};
+function show(id,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(!rendered[id]){rendered[id]=true;buildView(id);}
+}
+function fe(n){if(n==null||isNaN(n))return'—';const a=Math.abs(n);return(n<0?'-':'')+'€'+(a>=1e6?(a/1e6).toFixed(1)+'M':a>=1e3?(a/1e3).toFixed(0)+'K':Math.round(a).toLocaleString());}
+function fp(n){if(n==null||isNaN(n))return'—';return(n>0?'+':'')+n.toFixed(1)+'%';}
+function fpc(n){if(n==null||isNaN(n))return'<span class="muted">—</span>';const c=n>5?'green':n<-5?'red':'muted';return'<span class="'+c+'">'+fp(n)+'</span>';}
+function fhc(n){if(n==null)return'<span class="muted">—</span>';const c=n>0?'green':n<-3?'red':'muted';return'<span class="'+c+'">'+(n>0?'+':'')+n+'</span>';}
+function pc(p){return p>=1?'#0F6E56':p>=0.8?'#BA7517':'#E64847';}
+function buildView(id){
+  if(id==='recap')buildRecap();
+  if(id==='runrate')buildRunRate();
+  if(id==='scorecard')buildScorecard();
+  if(id==='agencies')buildAgencies();
+  if(id==='hotels')buildHotels();
+}
+function buildRecap(){
+  let tCon=0,tPrev=0,tRns=0,tNew=0,tPrevBk=0;
+  const body=document.getElementById('recap-body');
+  RECAP.forEach(r=>{
+    const adr=r.rns>0?Math.round(r.consumed/r.rns):0;
+    body.innerHTML+='<tr><td class="chain-name">'+r.chain+'</td><td>'+fe(r.consumed)+'</td><td>'+fpc(r.con_wow)+'</td><td>'+r.rns.toLocaleString()+'</td><td>'+(adr?'€'+adr:'—')+'</td><td>'+fe(r.new_bk)+'</td><td>'+fpc(r.bk_wow)+'</td><td style="font-weight:700;text-align:center">'+r.hotels_this_week+'</td><td style="text-align:center">'+fhc(r.hotels_chg)+'</td></tr>';
+    tCon+=r.consumed;tPrev+=r.prev_consumed;tRns+=r.rns;tNew+=r.new_bk;tPrevBk+=r.prev_bk;
+  });
+  const tAdr=tRns>0?Math.round(tCon/tRns):0;
+  const tWow=(tCon-tPrev)/tPrev*100,bWow=(tNew-tPrevBk)/tPrevBk*100;
+  const tH=RECAP.reduce((s,r)=>s+r.hotels_this_week,0);
+  const tHavg=RECAP.reduce((s,r)=>s+r.hotels_p4avg,0);
+  const tHchg=tH-Math.round(tHavg);
+  document.getElementById('recap-foot').innerHTML='<tr><td>TOTAL</td><td>'+fe(tCon)+'</td><td>'+fp(tWow)+'</td><td>'+tRns.toLocaleString()+'</td><td>€'+tAdr+'</td><td>'+fe(tNew)+'</td><td>'+fp(bWow)+'</td><td style="text-align:center">'+tH+'</td><td style="text-align:center">'+(tHchg>0?'+':'')+tHchg+'</td></tr>';
+  document.getElementById('recap-kpis').innerHTML=
+    '<div class="kpi"><div class="kpi-label">Consumed Mar 23–29</div><div class="kpi-value">'+fe(tCon)+'</div><div class="kpi-sub">Stays checked in this week</div></div>'
+    +'<div class="kpi"><div class="kpi-label">vs Mar 16–22</div><div class="kpi-value '+(tWow>=0?'green':'red')+'">'+fp(tWow)+'</div><div class="kpi-sub">Week-over-week change</div></div>'
+    +'<div class="kpi"><div class="kpi-label">New Bookings Made</div><div class="kpi-value">'+fe(tNew)+'</div><div class="kpi-sub">Demand generated this week</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Producing Hotels</div><div class="kpi-value '+(tHchg>=0?'green':'red')+'">'+tH+'</div><div class="kpi-sub">'+(tHchg>0?'+':'')+tHchg+' vs 4W avg</div></div>';
+  const cc=RECAP.filter(r=>r.consumed>0);
+  new Chart(document.getElementById('consumedChart'),{type:'bar',data:{labels:cc.map(r=>r.chain),datasets:[{label:'Mar 23-29',data:cc.map(r=>r.consumed),backgroundColor:'#E64847',borderRadius:3},{label:'Mar 16-22',data:cc.map(r=>r.prev_consumed),backgroundColor:'rgba(230,72,71,.2)',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{ticks:{font:{size:10},callback:v=>fe(v)}}}}});
+  const hc=RECAP.filter(r=>r.hotels_this_week>0);
+  new Chart(document.getElementById('hotelsChart'),{type:'bar',data:{labels:hc.map(r=>r.chain),datasets:[{label:'This week',data:hc.map(r=>r.hotels_this_week),backgroundColor:hc.map(r=>r.hotels_chg<-3?'rgba(230,72,71,.7)':'rgba(15,110,86,.7)'),borderRadius:3},{label:'4W avg',data:hc.map(r=>r.hotels_p4avg),backgroundColor:'rgba(200,200,200,.4)',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{ticks:{font:{size:10}}}}}});
+}
+function buildRunRate(){
+  const chains=Object.keys(RR);let onP=0,beh=0;
+  chains.forEach(c=>{if(c==='Pacifica')return;const lp=RR[c].latest_pace;if(lp&&lp>=1)onP++;else beh++;});
+  const tBudget=chains.reduce((s,c)=>s+RR[c].budget,0);
+  const tGap=chains.reduce((s,c)=>s+Math.max(0,RR[c].final_gap),0);
+  const tGen=chains.reduce((s,c)=>s+RR[c].total_gen,0);
+  document.getElementById('rr-kpis').innerHTML=
+    '<div class="kpi"><div class="kpi-label">On Pace</div><div class="kpi-value green">'+onP+'</div><div class="kpi-sub">New bk >= dynamic target</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Behind</div><div class="kpi-value red">'+beh+'</div><div class="kpi-sub">New bk < dynamic target</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Total Generated</div><div class="kpi-value">'+fe(tGen)+'</div><div class="kpi-sub">Consumed + OTB (2026)</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Total Gap</div><div class="kpi-value red">'+fe(tGap)+'</div><div class="kpi-sub">Budget - Consumed - OTB</div></div>';
+  const body=document.getElementById('rr-body');
+  Object.keys(RR).sort((a,b)=>RR[b].final_gap-RR[a].final_gap).forEach(c=>{
+    const d=RR[c],lp=d.latest_pace,isNA=c==='Pacifica';
+    const sc=isNA?'badge-na':lp>=1?'badge-on':lp>=0.8?'badge-warn':'badge-behind';
+    const st=isNA?'No data':lp>=1?'On Pace':lp>=0.8?'At Risk':'Behind';
+    const lcol=isNA?'#9CA3AF':pc(lp||0);
+    const cov=d.coverage,covcol=cov>=50?'#0F6E56':cov>=25?'#BA7517':'#E64847';
+    body.innerHTML+='<tr><td class="chain-name">'+c+'</td><td>'+fe(d.budget)+'</td><td>'+fe(d.consumed)+'</td><td>'+fe(d.otb)+'</td><td style="color:#E64847;font-weight:700">'+fe(Math.max(0,d.final_gap))+'</td><td style="color:'+covcol+';font-weight:700">'+cov.toFixed(1)+'%</td><td style="font-weight:700">'+fe(d.latest_target)+'</td><td>'+fe(d.latest_achieved)+'</td><td style="color:'+lcol+';font-weight:700">'+(lp?lp.toFixed(2)+'x':'—')+'</td><td><span class="badge '+sc+'">'+st+'</span></td></tr>';
+  });
+  let tc=null;
+  const csel=document.getElementById('csel');
+  Object.keys(RR).forEach((c,i)=>{
+    const btn=document.createElement('button');
+    btn.className='cs-btn'+(i===0?' active':'');
+    btn.textContent=c;
+    btn.onclick=()=>{document.querySelectorAll('.cs-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');buildDetail(c);if(tc)tc.destroy();tc=buildTrend(c);};
+    csel.appendChild(btn);
+  });
+  buildDetail(Object.keys(RR)[0]);
+  tc=buildTrend(Object.keys(RR)[0]);
+}
+function buildDetail(c){
+  const d=RR[c];
+  document.getElementById('calcBox').innerHTML='<strong>'+c+':</strong> Budget '+fe(d.budget)+' - Consumed '+fe(d.consumed)+' - OTB '+fe(d.otb)+' = Gap <strong style="color:#E64847">'+fe(d.final_gap)+'</strong> ('+d.coverage+'% covered) | Dynamic target = gap at start of each week / weeks remaining to Dec 31';
+  const tb=document.getElementById('detail-body');tb.innerHTML='';
+  d.weeks.forEach((w,i)=>{
+    const isLast=i===d.weeks.length-1;
+    const pStr=w.pace==null?'<span class="muted">—</span>':'<span style="color:'+pc(w.pace)+';font-weight:700">'+w.pace.toFixed(2)+'x</span>';
+    tb.innerHTML+='<tr style="'+(isLast?'font-weight:700;background:#FFF0F0':'')+'"><td>'+w.label+(isLast?' ★':'')+'</td><td>'+fe(w.achieved)+'</td><td>'+fe(w.dynamic_target)+'</td><td style="color:#6B7280">'+fe(w.gap_at_sow)+'</td><td>'+pStr+'</td></tr>';
+  });
+}
+function buildTrend(c){
+  const d=RR[c];
+  return new Chart(document.getElementById('trendChart'),{type:'bar',data:{labels:d.weeks.map(w=>w.label),datasets:[
+    {label:'New bookings made',data:d.weeks.map(w=>w.achieved),backgroundColor:d.weeks.map(w=>w.pace&&w.pace>=1?'rgba(15,110,86,.65)':'rgba(230,72,71,.65)'),borderRadius:3,order:2},
+    {label:'Dynamic target',data:d.weeks.map(w=>w.dynamic_target),type:'line',borderColor:'#5D0F31',borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#5D0F31',fill:false,order:1}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${fe(ctx.raw)}`}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{ticks:{font:{size:10},callback:v=>fe(v)}}}}});
+}
+function buildScorecard(){
+  const chains=Object.keys(RR);let onP=0,beh=0,bestP=0,bestC='',worstP=99,worstC='';
+  chains.forEach(c=>{
+    if(c==='Pacifica')return;
+    const lp=RR[c].latest_pace;
+    if(lp&&lp>=1)onP++;else beh++;
+    if(lp&&lp>bestP){bestP=lp;bestC=c;}
+    if(RR[c].final_gap>100000&&(lp||0)<worstP){worstP=lp||0;worstC=c;}
+  });
+  document.getElementById('sc-kpis').innerHTML=
+    '<div class="kpi"><div class="kpi-label">On Pace</div><div class="kpi-value green">'+onP+'</div><div class="kpi-sub">New bk >= dynamic target</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Behind</div><div class="kpi-value red">'+beh+'</div><div class="kpi-sub">New bk < dynamic target</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Best Pace</div><div class="kpi-value green">'+bestP.toFixed(2)+'x</div><div class="kpi-sub">'+bestC+'</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Most Behind</div><div class="kpi-value red">'+worstP.toFixed(2)+'x</div><div class="kpi-sub">'+worstC+'</div></div>';
+  const scSort=[...chains].sort((a,b)=>b==='Pacifica'?-1:a==='Pacifica'?1:(RR[b].latest_pace||0)-(RR[a].latest_pace||0));
+  const scDiv=document.getElementById('scorecard');
+  scSort.forEach(c=>{
+    const d=RR[c],lp=d.latest_pace,isNA=c==='Pacifica';
+    const bc=isNA?'badge-na':lp>=1?'badge-on':lp>=0.8?'badge-warn':'badge-behind';
+    const bt=isNA?'No data':lp>=1?'On Pace':lp>=0.8?'At Risk':'Behind';
+    const ps=isNA?'—':!lp?'0.00x':lp.toFixed(2)+'x';
+    const pcol=isNA?'#9CA3AF':pc(lp||0);
+    const diff=d.latest_achieved-d.latest_target;
+    const bw=lp?Math.min(100,Math.round(lp/3*100)):0;
+    const bcol=lp>=1?'#0F6E56':lp>=0.8?'#BA7517':'#E64847';
+    const wow=d.wow===null?'':d.wow>0?'<span class="green">▲'+d.wow.toFixed(1)+'%</span>':'<span class="red">▼'+Math.abs(d.wow).toFixed(1)+'%</span>';
+    scDiv.innerHTML+='<div class="sc"><div class="sc-top"><span class="sc-name">'+c+'</span><span class="badge '+bc+'">'+bt+'</span></div>'
+      +'<div class="sc-pace" style="color:'+pcol+'">'+ps+'</div>'
+      +'<div class="sc-detail">'+fe(d.latest_achieved)+' made · '+fe(d.latest_target)+' target · <span style="color:'+(diff>=0?'#0F6E56':'#E64847')+'">'+(diff>=0?'+':'')+fe(diff)+'</span></div>'
+      +'<div class="sc-row"><span>Gap: '+fe(Math.max(0,d.final_gap))+' ('+d.coverage.toFixed(0)+'% cvd)</span><span>'+wow+' WoW</span></div>'
+      +'<div class="sc-bar"><div class="sc-fill" style="width:'+bw+'%;background:'+bcol+'"></div></div></div>';
+  });
+  const acts=[];
+  chains.forEach(c=>{
+    if(c==='Pacifica')return;
+    const d=RR[c],lp=d.latest_pace;
+    if(d.final_gap>0&&(!lp||lp<1))acts.push({chain:c,pace:lp,gap:d.final_gap,wow:d.wow,diff:d.latest_achieved-d.latest_target});
+  });
+  acts.sort((a,b)=>b.gap-a.gap);
+  const actDiv=document.getElementById('actions');
+  if(!acts.length){actDiv.innerHTML='<div style="color:#9CA3AF;padding:8px 0;font-size:12px;">All chains on pace.</div>';}
+  acts.forEach(a=>{
+    const isRed=!a.pace||a.pace<0.8;
+    const ps=!a.pace||a.pace===0?'no bookings':a.pace.toFixed(2)+'x pace';
+    const ws=a.wow===null?'':(a.wow>0?' · +'+a.wow+'%':' · '+a.wow+'%')+' WoW';
+    actDiv.innerHTML+='<div class="act-row"><div class="act-dot" style="background:'+(isRed?'#E64847':'#BA7517')+';margin-top:4px"></div><div class="act-chain">'+a.chain+'</div><div class="act-msg">'+ps+ws+' · shortfall '+fe(a.diff)+'</div><div class="act-gap">'+fe(a.gap)+'</div></div>';
+  });
+  const barCs=chains.filter(c=>c!=='Pacifica').sort((a,b)=>(RR[a].latest_pace||0)-(RR[b].latest_pace||0));
+  const maxP=Math.max(...barCs.map(c=>RR[c].latest_pace||0));
+  new Chart(document.getElementById('paceChart'),{type:'bar',data:{labels:barCs,datasets:[
+    {data:barCs.map(c=>RR[c].latest_pace||0),backgroundColor:barCs.map(c=>{const p=RR[c].latest_pace||0;return p>=1?'rgba(15,110,86,.7)':p>=0.8?'rgba(186,117,23,.7)':'rgba(230,72,71,.7)';}),borderRadius:4},
+    {data:barCs.map(()=>1),type:'line',borderColor:'rgba(0,0,0,.2)',borderDash:[4,3],borderWidth:1.5,pointRadius:0,fill:false}
+  ]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},callback:v=>v+'x'},min:0,max:Math.min(4,maxP+0.5)},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+}
+function buildAgencies(){
+  const sev=AGS.filter(a=>a.sev==='SEVERE').length,drop=AGS.filter(a=>a.sev==='DROP').length;
+  document.getElementById('ag-kpis').innerHTML=
+    '<div class="kpi"><div class="kpi-label">Total Flagged</div><div class="kpi-value red">'+AGS.length+'</div><div class="kpi-sub">Agencies this week</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Severe (Zero)</div><div class="kpi-value red">'+sev+'</div><div class="kpi-sub">100% revenue drop</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Significant Drop</div><div class="kpi-value amber">'+drop+'</div><div class="kpi-sub">30%+ below 4W avg</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Chains Affected</div><div class="kpi-value">'+[...new Set(AGS.map(a=>a.chain))].length+'</div><div class="kpi-sub">Unique chains</div></div>';
+  const body=document.getElementById('ag-body');
+  AGS.forEach(a=>{
+    const bc=a.sev==='SEVERE'?'badge-severe':'badge-drop';
+    body.innerHTML+='<tr><td class="chain-name">'+a.chain+'</td><td style="text-align:left">'+a.agency+'</td><td>'+(a.this_wk>0?fe(a.this_wk):'<span class="red">€0</span>')+'</td><td>'+fe(a.p4avg)+'</td><td class="red">'+a.chg.toFixed(1)+'%</td><td><span class="badge '+bc+'">'+a.sev+'</span></td></tr>';
+  });
+}
+function buildHotels(){
+  const sev=HTS.filter(h=>h.sev==='SEVERE').length,drop=HTS.filter(h=>h.sev==='DROP').length;
+  document.getElementById('ht-kpis').innerHTML=
+    '<div class="kpi"><div class="kpi-label">Total Flagged</div><div class="kpi-value red">'+HTS.length+'</div><div class="kpi-sub">Hotels this week</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Severe (Zero)</div><div class="kpi-value red">'+sev+'</div><div class="kpi-sub">100% revenue drop</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Significant Drop</div><div class="kpi-value amber">'+drop+'</div><div class="kpi-sub">30%+ below 4W avg</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Chains Affected</div><div class="kpi-value">'+[...new Set(HTS.map(h=>h.chain))].length+'</div><div class="kpi-sub">Unique chains</div></div>';
+  const body=document.getElementById('ht-body');
+  HTS.forEach(h=>{
+    const bc=h.sev==='SEVERE'?'badge-severe':'badge-drop';
+    body.innerHTML+='<tr><td class="chain-name">'+h.chain+'</td><td style="text-align:left">'+h.hotel+'</td><td>'+(h.this_wk>0?fe(h.this_wk):'<span class="red">€0</span>')+'</td><td>'+fe(h.p4avg)+'</td><td class="red">'+h.chg.toFixed(1)+'%</td><td><span class="badge '+bc+'">'+h.sev+'</span></td></tr>';
+  });
+}
+buildView('recap');
+
+</script></body></html>
